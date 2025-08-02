@@ -1,30 +1,38 @@
-# P2P Blockchain Simulation
+# P2P Blockchain Network Simulation
 
-This project simulates a peer-to-peer (P2P) blockchain network using Python and Flask. Multiple nodes maintain independent blockchain copies and communicate to sync blocks, register peers, and resolve conflicts using a consensus algorithm.
+A simple peer-to-peer blockchain network simulation built with Python and Flask. Demonstrates blockchain fundamentals including consensus algorithms, node synchronization, and conflict resolution.
 
 ## Features
-- Simple blockchain with transaction, block, and chain structures
-- Mining logic with basic proof-of-work (PoW)
-- Multiple nodes simulated via Flask (each node runs on a separate port)
-- Node registration and discovery
+- Complete blockchain implementation with PoW mining
+- Multi-node P2P network simulation
 - Consensus algorithm (longest chain wins)
-- Blockchain syncing from peers
-- (Bonus) Simple HTML dashboard for chain and peer status
+- Web dashboard for real-time monitoring
+- One-click node management (Start/Stop all nodes)
+- Conflict simulation and resolution
 
-## Requirements
-- Python 3.x
-- Flask
-- requests
+## Quick Start
 
-## Installation
-1. Clone this repository or download the source code.
-2. Install dependencies:
+1. **Install dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
 
-## Running Nodes
-Each node runs as a separate process on a different port. For example:
+2. **Run the dashboard:**
+   ```bash
+   python dashboard.py
+   ```
+
+3. **Open browser:**
+   Navigate to `http://localhost:8080`
+
+4. **Start the network:**
+   - Click "Start All Nodes" button
+   - Create transactions and mine blocks
+   - Watch real-time status updates
+
+## Manual Setup (Alternative)
+
+Start individual nodes:
 ```bash
 python node.py --port 5000
 python node.py --port 5001
@@ -33,18 +41,18 @@ python node.py --port 5003
 ```
 
 ## API Endpoints
-- `POST /transactions/new` - Add a new transaction
-- `GET /mine` - Mine a new block
-- `GET /chain` - Get the full blockchain
-- `POST /nodes/register` - Register new peer nodes
-- `GET /nodes/resolve` - Run consensus algorithm
-- `GET /nodes/peers` - List all known peers
 
-## Bonus: Dashboard
-Visit `/dashboard` to view the blockchain and peer status in a simple HTML page.
+### Node Endpoints
+- `POST /transactions/new` - Create transaction
+- `GET /mine` - Mine a block
+- `GET /chain` - Get blockchain
+- `POST /nodes/register` - Register peers
+- `GET /nodes/resolve` - Run consensus
 
-## Screenshots/Logs
-Include screenshots or logs of nodes syncing and resolving conflicts as part of your submission.
+### Dashboard Endpoints
+- `POST /api/start` - Start all nodes
+- `POST /api/stop` - Stop all nodes
+- `GET /api/status` - Get node status
 
 ## License
 MIT 
