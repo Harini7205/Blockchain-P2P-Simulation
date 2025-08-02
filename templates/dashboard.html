@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blockchain Dashboard</title>
+    <style>
+        body {
+            background: #181a20;
+            color: #f1f1f1;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 30px auto;
+            background: #23272f;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px #000a;
+            padding: 32px 24px 24px 24px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 24px;
+            color: #ffe066;
+            letter-spacing: 2px;
+        }
+        .network-control, .create-transaction {
+            background: #22242b;
+            border-radius: 8px;
+            padding: 18px 20px;
+            margin-bottom: 28px;
+        }
+        .network-control button, .node-card button, .create-transaction button {
+            background: #2ec4b6;
+            color: #181a20;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 18px;
+            font-size: 1rem;
+            margin-right: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .network-control button.stop {
+            background: #ff6b6b;
+            color: #fff;
+        }
+        .network-control button:last-child {
+            margin-right: 0;
+        }
+        .node-status {
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-bottom: 32px;
+        }
+        .node-card {
+            background: #1a1c22;
+            border: 2px solid #2ec4b6;
+            border-radius: 10px;
+            padding: 18px 20px;
+            min-width: 220px;
+            flex: 1 1 220px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px #0005;
+        }
+        .node-card.offline {
+            border-color: #ff6b6b;
+            opacity: 0.7;
+        }
+        .node-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #ffe066;
+        }
+        .node-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .node-info span {
+            font-size: 1.1rem;
+        }
+        .create-transaction input, .create-transaction select {
+            padding: 8px 10px;
+            border-radius: 5px;
+            border: none;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        .create-transaction input[type="number"] {
+            width: 80px;
+        }
+        .create-transaction label {
+            margin-right: 8px;
+        }
+        @media (max-width: 900px) {
+            .node-status {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Blockchain Dashboard</h1>
+    <div class="network-control">
+        <button onclick="refreshAll()">Refresh Status</button>
+        <button onclick="startAllNodes()">Start All Nodes</button>
+        <button onclick="stopAllNodes()">Stop All Nodes</button>
+    </div>
+    <div class="node-status" id="nodeStatus">
+        <!-- Node cards will be injected here -->
+    </div>
+    <div class="create-transaction">
+        <h2>💰 Create Transaction</h2>
+        <form id="txForm" onsubmit="return submitTransaction()">
+            <label>From:</label>
+            <input type="text" id="sender" placeholder="Sender name" required>
+            <label>To:</label>
+            <input type="text" id="recipient" placeholder="Recipient name" required>
+            <label>Amount:</label>
+            <input type="number" id="amount" min="1" required>
+            <label>Node:</label>
+            <select id="nodeSelect"></select>
+            <button type="submit">Send</button>
+        </form>
+        <div id="txMsg" style="margin-top:10px;"></div>
+    </div>
+</div>
+<script>
+// List of node ports to monitor
+const nodePorts = [5000, 5001, 5002, 5003];
+const nodeStatusDiv = document.getElementById('nodeStatus');
+const nodeSelect = document.getElementById('nodeSelect');
+const txMsg = document.getElementById('txMsg');
+
+function getNodeUrl(port) {
+    // Now all frontend requests go to the dashboard backend
+    return `/api/chain/${port}`;
+}
+
+function renderNodes(statuses) {
+    nodeStatusDiv.innerHTML = '';
+    nodeSelect.innerHTML = '';
+    nodePorts.forEach(port => {
+        const status = statuses[port] || {online: false};
+        const card = document.createElement('div');
+        card.className = 'node-card' + (status.online ? '' : ' offline');
+        card.innerHTML = `
+            <div class="node-title">Node ${port} ${status.online ? '' : '<span style=\'color:#ff6b6b\'>(Offline)</span>'}</div>
+            <div class="node-info">
+                <span><b>${status.blocks ?? '-'}</b> Blocks</span>
+                <span><b>${status.pending ?? '-'}</b> Pending</span>
+            </div>
+            <button onclick="mineBlock(${port})" ${!status.online ? 'disabled' : ''}>Mine</button>
+        `;
+        nodeStatusDiv.appendChild(card);
+        // Add to node select if online
+        const opt = document.createElement('option');
+        opt.value = port;
+        opt.text = `Node ${port} - ${status.online ? 'Online' : 'Offline'}`;
+        if (!status.online) opt.disabled = true;
+        nodeSelect.appendChild(opt);
+    });
+}
+
+async function fetchNodeStatus(port) {
+    try {
+        const res = await fetch(`/api/chain/${port}`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        return {online: true, blocks: data.length, pending: 0};
+    } catch {
+        return {online: false};
+    }
+}
+
+async function fetchPending(port) {
+    try {
+        const res = await fetch(getNodeUrl(port) + '/chain');
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        // Pending transactions are not in the chain, so fetch from /chain and count
+        // But our backend doesn't expose pending, so we can't show it unless we add an endpoint
+        // For now, set to 0
+        return 0;
+    } catch {
+        return 0;
+    }
+}
+
+async function refreshAll() {
+    try {
+        const res = await fetch('/api/status');
+        if (!res.ok) throw new Error();
+        const statuses = await res.json();
+        
+        // Convert to the format expected by renderNodes
+        const statusMap = {};
+        statuses.forEach(status => {
+            statusMap[status.port] = {
+                online: status.online,
+                blocks: status.blocks,
+                pending: status.pending
+            };
+        });
+        
+        renderNodes(statusMap);
+    } catch {
+        // Fallback to individual requests if status endpoint fails
+        const statuses = {};
+        await Promise.all(nodePorts.map(async port => {
+            try {
+                const res = await fetch(`/api/chain/${port}`);
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                let pending = 0;
+                try {
+                    const txRes = await fetch(`/api/pending/${port}`);
+                    if (txRes.ok) {
+                        const txData = await txRes.json();
+                        pending = txData.pending ?? 0;
+                    }
+                } catch {}
+                statuses[port] = {online: true, blocks: data.length, pending};
+            } catch {
+                statuses[port] = {online: false};
+            }
+        }));
+        renderNodes(statuses);
+    }
+}
+
+async function startAllNodes() {
+    try {
+        const res = await fetch('/api/start', {method: 'POST'});
+        const data = await res.json();
+        if (data.error) {
+            alert('Error: ' + data.error);
+        } else {
+            alert('Success: ' + data.message);
+        }
+        setTimeout(refreshAll, 3000); // Wait a bit longer for nodes to fully start
+    } catch (error) {
+        alert('Failed to start nodes: ' + error.message);
+    }
+}
+
+async function stopAllNodes() {
+    try {
+        const res = await fetch('/api/stop', {method: 'POST'});
+        const data = await res.json();
+        alert(data.message);
+        setTimeout(refreshAll, 1000);
+    } catch (error) {
+        alert('Failed to stop nodes: ' + error.message);
+    }
+}
+
+async function mineBlock(port) {
+    try {
+        const res = await fetch(`/api/mine/${port}`, {method: 'POST'});
+        if (!res.ok) throw new Error();
+        await refreshAll();
+        alert(`Block mined on Node ${port}!`);
+    } catch {
+        alert(`Failed to mine on Node ${port}`);
+    }
+}
+
+async function submitTransaction() {
+    const sender = document.getElementById('sender').value;
+    const recipient = document.getElementById('recipient').value;
+    const amount = document.getElementById('amount').value;
+    const port = nodeSelect.value;
+    if (!sender || !recipient || !amount || !port) return false;
+    try {
+        const res = await fetch(`/api/transaction`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({sender, recipient, amount: parseInt(amount), port: parseInt(port)})
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        txMsg.innerText = `Transaction sent to Node ${port}: ${data.message}`;
+        document.getElementById('txForm').reset();
+        setTimeout(() => { txMsg.innerText = ''; }, 3000);
+    } catch {
+        txMsg.innerText = `Failed to send transaction to Node ${port}`;
+        setTimeout(() => { txMsg.innerText = ''; }, 3000);
+    }
+    return false;
+}
+
+// On load
+refreshAll();
+</script>
+</body>
+</html> 
