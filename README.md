@@ -32,6 +32,7 @@ Check it out live on https://blockchain-p2p-simulation.onrender.com
    - Click "Start All Nodes" button
    - Create transactions and mine blocks
    - Watch real-time status updates
+   - Click on a node to view its detailed status and list of blocks
 
 ## Manual Setup (Alternative)
 
@@ -56,6 +57,3 @@ python node.py --port 5003
 - `POST /api/start` - Start all nodes
 - `POST /api/stop` - Stop all nodes
 - `GET /api/status` - Get node status
-
-## License
-MIT 
