@@ -175,4 +175,4 @@ def api_connections(port):
         return jsonify({'peers': []})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=10000, debug=False) 
+    app.run(host='0.0.0.0', port=process.env.PORT, debug=False) 
