@@ -175,6 +175,4 @@ def api_connections(port):
         return jsonify({'peers': []})
 
 if __name__ == '__main__':
-    print("Simple Blockchain Dashboard")
-    print("Open your browser and go to: http://localhost:8080")
-    app.run(host='0.0.0.0', port=8080, debug=False) 
+    app.run(host='0.0.0.0', port=10000, debug=False) 
