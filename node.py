@@ -19,25 +19,6 @@ blockchain = Blockchain()
 
 node_processes = {}
 
-# HTML template for dashboard (bonus)
-dashboard_template = '''
-<!doctype html>
-<title>Blockchain Dashboard</title>
-<h1>Node Dashboard</h1>
-<p><b>Node ID:</b> {{ node_id }}</p>
-<p><b>Known Peers:</b> {{ peers }}</p>
-<h2>Blockchain ({{ chain|length }} blocks)</h2>
-<ol>
-{% for block in chain %}
-  <li>Index: {{ block.index if block.index else block['index'] }} | Hash: {{ block.hash if block.hash else '' }}<br>
-      Transactions: {{ block.transactions if block.transactions else block['transactions'] }}<br>
-      Nonce: {{ block.nonce if block.nonce else block['nonce'] }}<br>
-      Previous Hash: {{ block.previous_hash if block.previous_hash else block['previous_hash'] }}
-  </li>
-{% endfor %}
-</ol>
-'''
-
 @app.route('/transactions/new', methods=['POST'])
 def new_transaction():
     values = request.get_json()
