@@ -2,12 +2,15 @@
 
 A simple peer-to-peer blockchain network simulation built with Python and Flask. Demonstrates blockchain fundamentals including consensus algorithms, node synchronization, and conflict resolution.
 
+Check it out live on https://blockchain-p2p-simulation.onrender.com
+
 ## Features
 - Complete blockchain implementation with PoW mining
 - Multi-node P2P network simulation
 - Consensus algorithm (longest chain wins)
 - Web dashboard for real-time monitoring
 - One-click node management (Start/Stop all nodes)
+- Detailed node status view, along with all transactions (Reward of 1 for every mining)
 - Conflict simulation and resolution
 
 ## Quick Start
