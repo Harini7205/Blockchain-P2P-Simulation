@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Node {{port}} - Blockchain Details</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #181a20;
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #ffd700;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #00bcd4;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #0097a7;
+        }
+
+        .node-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .info-card h3 {
+            color: #ffd700;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .status.online {
+            background: #4caf50;
+            color: white;
+        }
+
+        .status.offline {
+            background: #f44336;
+            color: white;
+        }
+
+        .connections-list {
+            list-style: none;
+        }
+
+        .connections-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .connections-list li:last-child {
+            border-bottom: none;
+        }
+
+        .blockchain-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 20px;
+        }
+
+        .blockchain-section h3 {
+            color: #ffd700;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .block {
+            background: rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #00bcd4;
+        }
+
+        .block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .block-index {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .block-timestamp {
+            color: #ccc;
+            font-size: 0.9em;
+        }
+
+        .block-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .detail-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .detail-label {
+            font-weight: bold;
+            color: #00bcd4;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .detail-value {
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            color: #fff;
+        }
+
+        .transactions {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .transactions h4 {
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+
+        .transaction {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 5px;
+            border-left: 3px solid #4caf50;
+        }
+
+        .transaction:last-child {
+            margin-bottom: 0;
+        }
+
+        .genesis-block {
+            border-left-color: #ffd700;
+        }
+
+        .genesis-block .block-index::after {
+            content: " (Genesis)";
+            color: #ffd700;
+            font-size: 0.8em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #ccc;
+        }
+
+        .error {
+            background: rgba(244, 67, 54, 0.2);
+            color: #ffcdd2;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #f44336;
+        }
+
+        @media (max-width: 768px) {
+            .node-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .block-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .block-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Node {{port}} Details</h1>
+            <a href="/" class="back-btn">← Back to Dashboard</a>
+        </div>
+
+        <div class="node-info">
+            <div class="info-card">
+                <h3>Node Status</h3>
+                <div id="nodeStatus">
+                    <div class="loading">Loading...</div>
+                </div>
+            </div>
+            
+            <div class="info-card">
+                <h3>Connected Peers</h3>
+                <div id="connections">
+                    <div class="loading">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="blockchain-section">
+            <h3>Blockchain</h3>
+            <div id="blockchain">
+                <div class="loading">Loading blockchain data...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const port = parseInt('{{port}}');
+        
+        async function loadNodeData() {
+            try {
+                // Load node status
+                const statusResponse = await fetch(`/api/status`);
+                const statusData = await statusResponse.json();
+                const nodeStatus = statusData.find(n => n.port === port);
+                
+                if (nodeStatus) {
+                    document.getElementById('nodeStatus').innerHTML = `
+                        <div class="status ${nodeStatus.online ? 'online' : 'offline'}">${nodeStatus.online ? 'ONLINE' : 'OFFLINE'}</div>
+                        <p style="margin-top: 10px;">Blocks: ${nodeStatus.blocks}</p>
+                        <p>Pending: ${nodeStatus.pending}</p>
+                    `;
+                } else {
+                    document.getElementById('nodeStatus').innerHTML = `
+                        <div class="status offline">OFFLINE</div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('nodeStatus').innerHTML = `
+                    <div class="error">Error loading node status</div>
+                `;
+            }
+
+            try {
+                // Load connections
+                const connectionsResponse = await fetch(`/api/connections/${port}`);
+                const connectionsData = await connectionsResponse.json();
+                
+                if (connectionsData.peers && connectionsData.peers.length > 0) {
+                    const connectionsList = connectionsData.peers.map(peer => 
+                        `<li>${peer}</li>`
+                    ).join('');
+                    document.getElementById('connections').innerHTML = `
+                        <ul class="connections-list">${connectionsList}</ul>
+                    `;
+                } else {
+                    document.getElementById('connections').innerHTML = `
+                        <p>No connected peers</p>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('connections').innerHTML = `
+                    <div class="error">Error loading connections</div>
+                `;
+            }
+
+            try {
+                // Load blockchain
+                const chainResponse = await fetch(`/api/chain/${port}`);
+                const chainData = await chainResponse.json();
+                
+                if (chainData.chain && chainData.chain.length > 0) {
+                    const blocksHtml = chainData.chain.map((block, index) => {
+                        const isGenesis = index === 0;
+                        const timestamp = new Date(block.timestamp * 1000).toLocaleString();
+                        
+                        const transactionsHtml = block.transactions.length > 0 
+                            ? block.transactions.map(tx => `
+                                <div class="transaction">
+                                    <strong>From:</strong> ${tx.sender} | 
+                                    <strong>To:</strong> ${tx.recipient} | 
+                                    <strong>Amount:</strong> ${tx.amount}
+                                </div>
+                            `).join('')
+                            : '<p>No transactions</p>';
+                        
+                        return `
+                            <div class="block ${isGenesis ? 'genesis-block' : ''}">
+                                <div class="block-header">
+                                    <div class="block-index">Block #${block.index}</div>
+                                    <div class="block-timestamp">${timestamp}</div>
+                                </div>
+                                <div class="block-details">
+                                    <div class="detail-item">
+                                        <div class="detail-label">Nonce</div>
+                                        <div class="detail-value">${block.nonce}</div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <div class="detail-label">Previous Hash</div>
+                                        <div class="detail-value">${block.previous_hash}</div>
+                                    </div>
+                                </div>
+                                <div class="transactions">
+                                    <h4>Transactions (${block.transactions.length})</h4>
+                                    ${transactionsHtml}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    document.getElementById('blockchain').innerHTML = blocksHtml;
+                } else {
+                    document.getElementById('blockchain').innerHTML = `
+                        <div class="error">No blockchain data available</div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('blockchain').innerHTML = `
+                    <div class="error">Error loading blockchain: ${error.message}</div>
+                `;
+            }
+        }
+
+        // Load data when page loads
+        loadNodeData();
+    </script>
+</body>
+</html> 

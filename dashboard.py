@@ -157,6 +157,23 @@ def api_pending(port):
     except Exception:
         return jsonify({'pending': 0})
 
+@app.route('/node/<int:port>')
+def node_detail(port):
+    """Render detailed node view page"""
+    return render_template('node_detail.html', port=port)
+
+@app.route('/api/connections/<int:port>')
+def api_connections(port):
+    """Get peer connections for a specific node"""
+    try:
+        response = requests.get(f'http://localhost:{port}/nodes/peers', timeout=2)
+        if response.status_code == 200:
+            return jsonify(response.json())
+        else:
+            return jsonify({'peers': []})
+    except Exception:
+        return jsonify({'peers': []})
+
 if __name__ == '__main__':
     print("Simple Blockchain Dashboard")
     print("Open your browser and go to: http://localhost:8080")

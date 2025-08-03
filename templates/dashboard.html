@@ -150,13 +150,15 @@ function renderNodes(statuses) {
         const status = statuses[port] || {online: false};
         const card = document.createElement('div');
         card.className = 'node-card' + (status.online ? '' : ' offline');
+        card.style.cursor = 'pointer';
+        card.onclick = () => window.location.href = `/node/${port}`;
         card.innerHTML = `
             <div class="node-title">Node ${port} ${status.online ? '' : '<span style=\'color:#ff6b6b\'>(Offline)</span>'}</div>
             <div class="node-info">
                 <span><b>${status.blocks ?? '-'}</b> Blocks</span>
                 <span><b>${status.pending ?? '-'}</b> Pending</span>
             </div>
-            <button onclick="mineBlock(${port})" ${!status.online ? 'disabled' : ''}>Mine</button>
+            <button onclick="event.stopPropagation(); mineBlock(${port})" ${!status.online ? 'disabled' : ''}>Mine</button>
         `;
         nodeStatusDiv.appendChild(card);
         // Add to node select if online
